@@ -11,15 +11,11 @@ print("第六步：残差分析与不确定性评估")
 print("="*60)
 
 # ----------------------------- 1. 加载数据 -----------------------------
-# 加载第五步的预测结果
-pred_data = np.load('advanced_predictions.npz')
+# 加载第三步（去趋势+复合核GPR）的预测结果
+pred_data = np.load('gpr_results.npz')
 y_test = pred_data['y_test']
-y_pred = pred_data['y_pred']
-y_std = pred_data['y_std']
-
-# 也可从原始数据加载真实值（如果上面没有y_test，可从mauna_loa_data加载）
-# data = np.load('mauna_loa_data.npz')
-# y_test = data['y_test']
+y_pred = pred_data['y_pred_composite']
+y_std = pred_data['y_std_composite']
 
 # ----------------------------- 2. 计算残差 -----------------------------
 residuals = y_test - y_pred
