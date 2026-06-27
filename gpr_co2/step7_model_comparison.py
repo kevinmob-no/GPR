@@ -37,19 +37,21 @@ r2_base = r2_score(y_test, y_pred_base)
 
 # 加载或训练复合核GPR
 try:
-    pred_data = np.load('advanced_predictions.npz')
-    y_pred_adv = pred_data['y_pred']
-    rmse_adv = pred_data['rmse']
-    r2_adv = pred_data['r2']
-    print("已加载复合核预测结果 (advanced_predictions.npz)")
+    pred_data = np.load('gpr_results.npz')
+    y_pred_adv = pred_data['y_pred_composite']
+    rmse_adv = pred_data['rmse_composite']
+    r2_adv = pred_data['r2_composite']
+    print("已加载复合核预测结果 (gpr_results.npz)")
 except FileNotFoundError:
-    print("未找到 advanced_predictions.npz，重新训练复合核模型...")
-    from sklearn.gaussian_process.kernels import RationalQuadratic, ExpSineSquared
-    k_long = 66.0**2 * RBF(length_scale=67.0)
-    k_season = 2.4**2 * RBF(length_scale=90.0) * ExpSineSquared(length_scale=1.3, periodicity=1.0)
-    k_irreg = 0.66**2 * RationalQuadratic(alpha=0.78, length_scale=1.2)
-    k_noise = 0.18**2 * RBF(length_scale=0.134) + WhiteKernel(noise_level=0.19**2)
-    co2_kernel = k_long + k_season + k_irreg + k_noise
+    print("未找到 gpr_results.npz，正在重新训练...")
+    # 重新运行 step_co2_detrend_predict.py 或用简单复合核训练
+    from sklearn.gaussian_process.kernels import ExpSineSquared
+    k_long = C(1.0, (1e-3, 1e3)) * RBF(10.0, (1e-1, 1e2))
+    k_season = C(1.0) * RBF(5.0, (1e-1, 1e2)) * ExpSineSquared(length_scale=1.0, periodicity=1.0,
+                                                                  length_scale_bounds=(1e-2, 1e1),
+                                                                  periodicity_bounds=(1.0, 1.0))
+    k_noise = WhiteKernel(noise_level=1e-3, noise_level_bounds=(1e-5, 1e1))
+    co2_kernel = k_long + k_season + k_noise
     gpr_adv = GaussianProcessRegressor(kernel=co2_kernel, n_restarts_optimizer=5, random_state=42)
     gpr_adv.fit(X_train, y_train_centered)
     y_pred_adv_centered = gpr_adv.predict(X_test)
@@ -62,7 +64,7 @@ print("\n测试集性能对比:")
 print(f"{'模型':<20} {'RMSE (ppm)':<15} {'R²':<10}")
 print("-" * 45)
 print(f"{'基础GPR (RBF核)':<20} {rmse_base:<15.4f} {r2_base:<10.4f}")
-print(f"{'复合核GPR (论文复现)':<20} {rmse_adv:<15.4f} {r2_adv:<10.4f}")
+print(f"{'复合核GPR (去趋势+周期核)':<20} {rmse_adv:<15.4f} {r2_adv:<10.4f}")
 print(f"\n复合核相比基础模型 RMSE 降低: {rmse_base - rmse_adv:.4f} ppm")
 
 # 可视化对比

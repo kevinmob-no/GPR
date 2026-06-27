@@ -134,7 +134,7 @@ coverage = np.mean((c_test >= lower) & (c_test <= upper))
 print("\n测试集性能指标:")
 print(f"  RMSE = {rmse:.4f} ppm")
 print(f"  MAE  = {mae:.4f} ppm")
-print(f"  R²   = {r2:.4f}")
+print(f"  R2 = {r2:.4f}")
 print(f"  MAPE = {mape:.2f}%")
 print(f"  95% 置信区间覆盖率: {coverage * 100:.1f}%")
 
@@ -170,8 +170,8 @@ y_pred_simple = trend_poly(t_test) + (y_pred_simple_centered + residual_mean)
 rmse_simple = np.sqrt(mean_squared_error(c_test, y_pred_simple))
 r2_simple = r2_score(c_test, y_pred_simple)
 
-print(f"RBF核模型测试集 RMSE = {rmse_simple:.4f} ppm, R² = {r2_simple:.4f}")
-print(f"复合核模型测试集 RMSE = {rmse:.4f} ppm, R² = {r2:.4f}")
+print(f"RBF核模型测试集 RMSE = {rmse_simple:.4f} ppm, R2 = {r2_simple:.4f}")
+print(f"复合核模型测试集 RMSE = {rmse:.4f} ppm, R2 = {r2:.4f}")
 
 # 保存最终结果供后续使用
 np.savez('gpr_results.npz',
